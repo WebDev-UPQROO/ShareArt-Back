@@ -7,84 +7,76 @@ const Users = require("../models/UsersModel")
 const Followers = require("../models/FollowerModel")
 const Groups = require("../models/GroupsModel")
 const UsersGroup = require("../models/UsersGroupsModel")
+const mongoose = require("mongoose");
 
 /* GET 10 posts */
-router.get('/post/:id', async function(req, res) {
-  if (req.params.id === 'id')
-    await Posts.find().limit(10)
-        .then(posts => res.json(posts))
-        .catch(err => res.json(err))
-  else
-    await Posts.find({idUser: req.params.id}).limit(10)
-        .then(posts => res.json(posts))
-        .catch(() => {
-          res.status(500);
-          res.json({"error":"Something went wrong"});
-        })
+router.put('/post', async function(req, res) {
+    let ids = [];
+    let post;
+
+    try {
+        if (req.body.idUser == null) {
+            post = await Posts.find().limit(10).sort({_id: -1});
+        } else {
+            const follows = await Followers.aggregate([
+                {$match: {idUser: mongoose.Types.ObjectId(req.body.idUser)}},
+                {$sample: {size: 500}}
+
+            ]);
+            ids = follows.map(follow => {
+                Followers.hydrate(follow);
+                return follow.idFollowed;
+
+            });
+            post = await Posts.find().where("idUser").in(ids).limit(10).sort({_id: -1});
+        }
+        res.json(post);
+    } catch (err) {
+        res.status(500);
+        res.json({"error": err});
+    }
+
 });
 /* GET comments */
 router.put('/comments', async function(req, res) {
     let comments = [];
-        req.body.comments.forEach(comment => comments.push(Comments.findOne({_id: comment})));
-        Promise.all(comments)
-            .then(response => res.json(response))
-            .catch(() => {
+
+    req.body.comments.forEach(comment => comments.push(Comments.findOne({_id: comment})));
+    Promise.all(comments)
+        .then(response => res.json(response))
+        .catch(() => {
             res.status(500);
             res.json({"error":" Something went wrong"});
         });
 });
 /* GET 10 Artists */
-router.get('/artists/:id', async function(req, res) {
-    if (req.params.id === 'id')
-        await Users.find().limit(10).select('-password')
-            .then(artists => res.json(artists))
-            .catch(err => res.json(err))
-    else {
-        let artists = [];
-        await Users.find().limit(5).select('-password')
-            .then(users => {
-                 artists = users.map(async artist => {
-                        await Followers.exists({idUser: req.params.id, idFollowed: artist._id}).then(follow =>{
-                            artist.set("follow", follow , {strict: false});
-                        })
-                     return artist
-                    })
-                Promise.all(artists).then(artist =>
-                    res.json(artist))
+router.put('/artists', async function (req, res) {
+    let artist = await Users.find().limit(10).select('-password').select('-idCategories');
 
-            })
-            .catch((err) => {
-                res.status(500);
-                res.json({"error": err});
-            })
+    if (req.body.idUser !== null) {
+        let artists = artist.map(async artist => {
+            await Followers.exists({idUser: req.body.idUser, idFollowed: artist._id})
+                .then(follow => (artist.set("follow", follow, {strict: false})));
+            return artist
+        });
+        artist = await Promise.all(artists);
     }
+    res.json(artist);
 });
 
-/* GET 10 posts */
-router.get('/groups/:id', async function(req, res) {
-    if (req.params.id === 'id')
-        await Groups.find().limit(5)
-            .then(posts => res.json(posts))
-            .catch(err => res.json(err))
-    else {
-        let groupsFinal = [];
-        await Groups.find().limit(5)
-            .then(groups => {
-                groupsFinal = groups.map(async group => {
-                    await UsersGroup.exists({idUser: req.params.id, idGroup: group._id}).then(follow => {
-                        group.set("member", follow, {strict: false});
-                    })
-                    return group
-                })
-                Promise.all(groupsFinal).then(artist =>
-                    res.json(artist))
+/* GET 10 groups */
+router.put('/groups', async function(req, res) {
+    let group = await Groups.find().limit(10);
 
-            })
-            .catch((err) => {
-                res.status(500);
-                res.json({"error": err});
-            })
+    if (req.body.idUser !== null){
+        let groups = group.map(async group => {
+            await UsersGroup.exists({idUser: req.body.idUser, idGroup: group._id})
+                .then(member => (group.set("member", member, {strict: false})))
+            return group
+        });
+        group = await  Promise.all(groups);
     }
+    res.json(group);
 });
 
 module.exports = router;

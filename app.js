@@ -10,7 +10,7 @@ require('dotenv').config()
 
 const homeRouter = require('./routes/home');
 const profileRouter = require('./routes/profile');
-const usersRouter = require('./routes/users');
+const usersRouter = require('./routes/groups');
 const bodyParser = require("body-parser");
 
 const app = express();
