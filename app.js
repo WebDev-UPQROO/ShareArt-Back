@@ -13,7 +13,7 @@ const bodyParser = require("body-parser");
 
 const app = express();
 
-const URL = '/shareart/'
+const URL = '/shareart/v1/'
 
 //DB Connection
 const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.c0a6k.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
