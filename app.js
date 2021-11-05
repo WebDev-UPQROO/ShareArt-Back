@@ -6,7 +6,6 @@ const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
-require('dotenv').config()
 
 const homeRouter = require('./routes/home');
 const profileRouter = require('./routes/profile');
