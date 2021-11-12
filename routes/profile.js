@@ -95,7 +95,8 @@ router.put('/groups', async function (req, res) {
     else
         userGroups = await UsersGroup.find({idUser: req.body.id})
             .where("_id").lt(req.body.idGroup)
-            .sort({_id: -1}).limit(10);
+            .sort({_id: -1})
+            .limit(10);
 
     userGroups.forEach(userGroup => {
         groups.push(Groups.findOne(

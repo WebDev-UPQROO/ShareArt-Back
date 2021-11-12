@@ -16,7 +16,16 @@ router.put('/post', async function(req, res) {
 
     try {
         if (req.body.idUser == null) {
-            post = await Posts.find().limit(10).sort({_id: -1});
+            if (req.body.idPost == null)
+                post = await Posts.find()
+                    .sort({_id: -1})
+                    .limit(10);
+            else
+                post = await Posts.find()
+                    .where('_id').lt(req.body.idPost)
+                    .sort({_id: -1})
+                    .limit(10);
+
         } else {
             const follows = await Followers.aggregate([
                 {$match: {idUser: mongoose.Types.ObjectId(req.body.idUser)}},
@@ -28,7 +37,17 @@ router.put('/post', async function(req, res) {
                 return follow.idFollowed;
 
             });
-            post = await Posts.find().where("idUser").in(ids).limit(10).sort({_id: -1});
+            if (req.body.idPost == null)
+                post = await Posts.find()
+                    .where("idUser").in(ids)
+                    .sort({_id: -1})
+                    .limit(10);
+            else
+                post = await Posts.find()
+                    .where("idUser").in(ids)
+                    .where('_id').lt(req.body.idPost)
+                    .sort({_id: -1})
+                    .limit(10);
         }
         res.json(post);
     } catch (err) {
@@ -51,7 +70,10 @@ router.put('/comments', async function(req, res) {
 });
 /* GET 10 Artists */
 router.put('/artists', async function (req, res) {
-    let artist = await Users.find().limit(10).select('-password').select('-idCategories');
+    let artist = await Users.find()
+        .select('-password')
+        .select('-idCategories')
+        .limit(10);
 
     if (req.body.idUser !== null) {
         let artists = artist.map(async artist => {
