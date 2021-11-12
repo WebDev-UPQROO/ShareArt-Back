@@ -8,7 +8,9 @@ const Groups = require("../models/GroupsModel")
 const UsersGroup = require("../models/UsersGroupsModel")
 
 router.get('/:id', async function (req, res) {
-    await Users.findOne({_id: req.params.id}).select('-password').select('-idCategories')
+    await Users.findOne({_id: req.params.id})
+        .select('-password')
+        .select('-idCategories')
         .then(user => res.json(user))
         .catch(() => {
             res.status(404);
@@ -68,9 +70,9 @@ router.put('/:follow', async function (req, res) {
 
     const following = await Promise.all(users);
 
-    if (req.body.idUser == null) {
+    if (req.body.idUser == null)
         res.json(following);
-    } else {
+    else {
         followers = following.map(async follower => {
             await Followers.exists({idUser: req.body.idUser, idFollowed: follower._id})
                 .then(follow => follower.set("follow", follow, {strict: false}))
@@ -89,11 +91,11 @@ router.put('/groups', async function (req, res) {
     let userGroups;
 
     if (req.body.idGroup == null)
-        userGroups = await UsersGroup.find({idUser: req.body.id})
+        userGroups = await UsersGroup.find({"idUser": req.body.id})
             .sort({_id: -1})
             .limit(10);
     else
-        userGroups = await UsersGroup.find({idUser: req.body.id})
+        userGroups = await UsersGroup.find({"idUser": req.body.id})
             .where("_id").lt(req.body.idGroup)
             .sort({_id: -1})
             .limit(10);

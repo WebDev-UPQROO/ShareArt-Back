@@ -10,7 +10,7 @@ const UsersGroup = require("../models/UsersGroupsModel")
 const mongoose = require("mongoose");
 
 /* GET 10 posts */
-router.put('/post', async function(req, res) {
+router.put('/post', async function (req, res) {
     let ids = [];
     let post;
 
@@ -96,7 +96,7 @@ router.put('/groups', async function(req, res) {
                 .then(member => (group.set("member", member, {strict: false})))
             return group
         });
-        group = await  Promise.all(groups);
+        group = await Promise.all(groups);
     }
     res.json(group);
 });

@@ -8,7 +8,7 @@ mongoose.Promise = require('bluebird');
 
 const homeRouter = require('./routes/home');
 const profileRouter = require('./routes/profile');
-const usersRouter = require('./routes/groups');
+const groupsRouter = require('./routes/groups');
 const bodyParser = require("body-parser");
 
 const app = express();
@@ -42,7 +42,7 @@ app.use((req, res, next) => {
 });
 
 app.use(URL+'home', homeRouter);
-app.use(URL+'users', usersRouter);
 app.use(URL+'profile', profileRouter);
+app.use(URL+'groups', groupsRouter);
 
 module.exports = app;
