@@ -1,34 +1,36 @@
 const express = require('express');
 const router = express.Router();
 
-const Users = require("../models/UsersModel");
-const Posts = require("../models/PostsModel");
-const Followers = require("../models/FollowerModel")
-const Groups = require("../models/GroupsModel")
-const UsersGroup = require("../models/UsersGroupsModel")
+const User = require("../models/UserModel");
+const Post = require("../models/PostModel");
+const Follower = require("../models/FollowerModel")
+const Group = require("../models/GroupModel")
+const UserGroup = require("../models/UserGroupModel")
 
 router.get('/:id', async function (req, res) {
-    await Users.findOne({_id: req.params.id})
-        .select('-password')
-        .select('-idCategories')
+    const {id} = req.params;
+    await User.findOne({'_id': id})
+        .populate('categories')
         .then(user => res.json(user))
-        .catch(() => {
+        .catch((err) => {
             res.status(404);
             res.json({"error": "User profile not found"});
+            console.log(err)
         })
 });
 
 router.put('/posts', async function (req, res) {
+    const {id, idPost} = req.body;
     let post = [];
     try {
-        if (req.body.idPost == null) {
-            post = await Posts.find({idUser: req.body.id})
-                .sort({_id: -1})
+        if (idPost == null) {
+            post = await Post.find({'user': id})
+                .sort({'_id': -1})
                 .limit(10);
         } else {
-            post = await Posts.find({idUser: req.body.id})
-                .where('_id').lt(req.body.idPost)
-                .sort({_id: -1})
+            post = await Post.find({'user': id})
+                .where('_id').lt(idPost)
+                .sort({'_id': -1})
                 .limit(10);
         }
         res.json(post);
@@ -39,43 +41,45 @@ router.put('/posts', async function (req, res) {
 });
 
 router.put('/:follow', async function (req, res) {
+    const {follow} = req.params;
+    const {id, idFollow, idUser} = req.body;
+
     let follows;
     let users = [];
     let followers = [];
 
-    let filter1 = 'idUser';
-    let filter2 = 'idFollowed';
+    let filter1 = 'user';
+    let filter2 = 'followed';
 
-    if(req.params.follow === 'followers') {
-        filter1 = 'idFollowed';
-        filter2 = 'idUser';
+    if (follow === 'followers') {
+        filter1 = 'followed';
+        filter2 = 'user';
     }
 
-    if (req.body.idFollow == null)
-        follows = await Followers.find({filter1: req.body.id})
-            .sort({_id: -1})
+    if (idFollow == null)
+        follows = await Follower.find({filter1: id})
+            .sort({'_id': -1})
             .limit(10);
     else
-        follows = await Followers.find({filter1: req.body.id})
-            .where("_id").lt(req.body.idFollow)
-            .sort({_id: -1})
+        follows = await Follower.find({filter1: id})
+            .where('_id').lt(idFollow)
+            .sort({'_id': -1})
             .limit(10);
 
     follows.forEach(follow => {
-        users.push(Users.findOne(
-            {_id: follow[filter2]})
-            .select('-password').select('-idCategories')
-            .then(user => user.set("idFollow", follow._id, {strict: false})))
+        users.push(User.findOne({'_id': follow[filter2]})
+            .select('-categories')
+            .then(user => user.set('idFollow', follow._id, {strict: false})))
     })
 
     const following = await Promise.all(users);
 
-    if (req.body.idUser == null)
+    if (idUser == null)
         res.json(following);
     else {
         followers = following.map(async follower => {
-            await Followers.exists({idUser: req.body.idUser, idFollowed: follower._id})
-                .then(follow => follower.set("follow", follow, {strict: false}))
+            await Follower.exists({'user': idUser, 'followed': follower._id})
+                .then(follow => follower.set('follow', follow, {strict: false}))
 
             return follower
         })
@@ -86,34 +90,35 @@ router.put('/:follow', async function (req, res) {
 });
 
 router.put('/groups', async function (req, res) {
+    const {id, idGroup, idUser} = req.body;
     let groups = [];
     let groupRes = [];
     let userGroups;
 
-    if (req.body.idGroup == null)
-        userGroups = await UsersGroup.find({"idUser": req.body.id})
-            .sort({_id: -1})
+    if (idGroup == null)
+        userGroups = await UserGroup.find({'user': id})
+            .sort({'_id': -1})
             .limit(10);
     else
-        userGroups = await UsersGroup.find({"idUser": req.body.id})
-            .where("_id").lt(req.body.idGroup)
-            .sort({_id: -1})
+        userGroups = await UserGroup.find({'user': id})
+            .where('_id').lt(idGroup)
+            .sort({'_id': -1})
             .limit(10);
 
     userGroups.forEach(userGroup => {
-        groups.push(Groups.findOne(
-            {_id: userGroup.idGroup })
-            .then(group => group.set("idUserGroup", userGroup._id, {strict: false})))
+        groups.push(Group.findOne(
+            {'_id': userGroup.group })
+            .then(group => group.set('idUserGroup', userGroup._id, {strict: false})))
     })
 
     const groupList = await Promise.all(groups);
 
-    if (req.body.idUser == null) {
+    if (idUser == null) {
         res.json(groupList);
     } else {
         groupRes = groupList.map(async group => {
-            await UsersGroup.exists({idUser: req.body.idUser, idGroup: group._id})
-                .then(member => group.set("member", member, {strict: false}))
+            await UserGroup.exists({'user': idUser, 'group': group._id})
+                .then(member => group.set('member', member, {strict: false}))
 
             return group
         })

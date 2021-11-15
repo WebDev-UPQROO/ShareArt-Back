@@ -1,0 +1,18 @@
+const mongoose = require('mongoose');
+const {Schema, model} = mongoose;
+
+const PostsSchema = new Schema({
+    _id: mongoose.Types.ObjectId,
+    user: {type: mongoose.Types.ObjectId, ref: 'user'},
+    categories: {type: mongoose.Types.ObjectId, ref: 'category'},
+    group: {type: mongoose.Types.ObjectId, ref: 'group'},
+    postOrigin: {type: mongoose.Types.ObjectId, ref: 'post'},
+    comments: {type: [mongoose.Types.ObjectId], ref: 'comment'},
+    title: String,
+    post: String,
+    photo: String,
+    votes: {type: [mongoose.Types.ObjectId], ref: 'user'}
+});
+
+const post = model('post', PostsSchema)
+module.exports = post;
