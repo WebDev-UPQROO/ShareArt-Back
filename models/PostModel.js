@@ -14,5 +14,5 @@ const PostsSchema = new Schema({
     votes: {type: [mongoose.Types.ObjectId], ref: 'user'}
 });
 
-const post = model('post', PostsSchema)
+const post = model('post', PostsSchema,'post')
 module.exports = post;

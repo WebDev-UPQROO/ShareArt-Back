@@ -25,10 +25,12 @@ router.put('/posts', async function (req, res) {
     try {
         if (idPost == null) {
             post = await Post.find({'user': id})
+                .populate('user')
                 .sort({'_id': -1})
                 .limit(10);
         } else {
             post = await Post.find({'user': id})
+                .populate('user')
                 .where('_id').lt(idPost)
                 .sort({'_id': -1})
                 .limit(10);

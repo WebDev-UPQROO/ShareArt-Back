@@ -12,5 +12,5 @@ const GroupSchema = new Schema({
     totalUsers: Number
 });
 
-const group = model('group', GroupSchema)
+const group = model('group', GroupSchema,'group')
 module.exports = group;

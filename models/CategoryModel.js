@@ -8,5 +8,5 @@ const CategorySchema = new Schema({
     tags: [String]
 });
 
-const category = model('category', CategorySchema)
+const category = model('category', CategorySchema,'category')
 module.exports = category;

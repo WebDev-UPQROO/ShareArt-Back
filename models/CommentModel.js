@@ -11,5 +11,5 @@ const CommentSchema = new Schema({
     votes: {type: [mongoose.Types.ObjectId], ref: 'user'}
 });
 
-const comment = model('comment', CommentSchema)
+const comment = model('comment', CommentSchema,'comment')
 module.exports = comment;
