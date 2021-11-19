@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const {Schema, model} = mongoose;
 
 const UserSchema = new Schema({
-    _id: mongoose.Types.ObjectId,
     categories: {type: [mongoose.Types.ObjectId], ref: 'category'},
     name: String,
     username: String,

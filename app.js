@@ -4,17 +4,19 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
+
 mongoose.Promise = require('bluebird');
 
 const homeRouter = require('./routes/home');
 const profileRouter = require('./routes/profile');
-const groupsRouter = require('./routes/groups');
+const groupRouter = require('./routes/group');
+const authRouter = require('./routes/auth');
+
 const bodyParser = require("body-parser");
 
 const app = express();
 
 const URL = '/shareart/v1/'
-
 //DB Connection
 const uri =`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.c0a6k.mongodb.net/${process.env.DB_NAME}?retryWrites=true&w=majority`;
 
@@ -48,6 +50,7 @@ app.use((req, res, next) => {
 
 app.use(URL+'home', homeRouter);
 app.use(URL+'profile', profileRouter);
-app.use(URL+'groups', groupsRouter);
+app.use(URL+'group', groupRouter);
+app.use(URL+'auth', authRouter);
 
 module.exports = app;

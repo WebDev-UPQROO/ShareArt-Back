@@ -1,14 +1,15 @@
 const express = require('express');
+const mongoose = require("mongoose");
 const router = express.Router();
 
-const Posts = require("../models/PostModel")
-const Comments = require("../models/CommentModel")
-const Users = require("../models/UserModel")
-const Followers = require("../models/FollowerModel")
-const Groups = require("../models/GroupModel")
-const UsersGroup = require("../models/UserGroupModel")
+const Post = require("../models/PostModel")
+const Comment = require("../models/CommentModel")
+const User = require("../models/UserModel")
+const Follower = require("../models/FollowerModel")
+const Group = require("../models/GroupModel")
+const UserGroup = require("../models/UserGroupModel")
 const Category = require("../models/CategoryModel")
-const mongoose = require("mongoose");
+
 
 /* GET 10 posts */
 router.put('/post', async function (req, res) {
@@ -19,36 +20,36 @@ router.put('/post', async function (req, res) {
     try {
         if (idUser == null) {
             if (idPost == null)
-                post = await Posts.find()
+                post = await Post.find()
                     .populate('user')
                     .sort({'_id': -1})
                     .limit(10);
             else
-                post = await Posts.find()
+                post = await Post.find()
                     .populate('user')
                     .where('_id').lt(idPost)
                     .sort({'_id': -1})
                     .limit(10);
 
         } else {
-            const follows = await Followers.aggregate([
+            const follows = await Follower.aggregate([
                 {$match: {user: mongoose.Types.ObjectId(idUser)}},
                 {$sample: {size: 500}}
 
             ]);
             ids = follows.map(follow => {
-                Followers.hydrate(follow);
+                Follower.hydrate(follow);
                 return follow.followed;
 
             });
             if (idPost == null)
-                post = await Posts.find()
+                post = await Post.find()
                     .populate('user')
                     .where('user').in(ids)
                     .sort({'_id': -1})
                     .limit(10);
             else
-                post = await Posts.find()
+                post = await Post.find()
                     .populate('user')
                     .where('user').in(ids)
                     .where('_id').lt(idPost)
@@ -67,7 +68,7 @@ router.put('/comments', async function(req, res) {
     const {comment} = req.body;
     let comments = [];
 
-    comment.forEach(comment => comments.push(Comments.findOne({'_id': comment})));
+    comment.forEach(comment => comments.push(Comment.findOne({'_id': comment})));
     Promise.all(comments)
         .then(response => res.json(response))
         .catch(() => {
@@ -78,13 +79,13 @@ router.put('/comments', async function(req, res) {
 /* GET 10 Artists */
 router.put('/artists', async function (req, res) {
     const {idUser} = req.body;
-    let artist = await Users.find()
+    let artist = await User.find()
         .select('-categories')
         .limit(10);
 
     if (idUser !== null) {
         let artists = artist.map(async artist => {
-            await Followers.exists({'user': idUser, 'followed': artist._id})
+            await Follower.exists({'user': idUser, 'followed': artist._id})
                 .then(follow => (artist.set('follow', follow, {strict: false})));
             return artist
         });
@@ -96,11 +97,11 @@ router.put('/artists', async function (req, res) {
 /* GET 10 groups */
 router.put('/groups', async function(req, res) {
     const {idUser} = req.body;
-    let group = await Groups.find().limit(10);
+    let group = await Group.find().limit(10);
 
-    if (idUser !== null){
+    if (idUser !== null) {
         let groups = group.map(async group => {
-            await UsersGroup.exists({'user': idUser, 'group': group._id})
+            await UserGroup.exists({'user': idUser, 'group': group._id})
                 .then(member => (group.set('member', member, {strict: false})))
             return group
         });
