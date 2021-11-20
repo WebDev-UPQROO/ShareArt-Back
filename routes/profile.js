@@ -3,6 +3,7 @@ const router = express.Router();
 
 const User = require("../models/UserModel");
 const Post = require("../models/PostModel");
+const Comment = require("../models/CommentModel")
 const Follower = require("../models/FollowerModel")
 const Group = require("../models/GroupModel")
 const UserGroup = require("../models/UserGroupModel")
@@ -22,6 +23,7 @@ router.get('/:id', async function (req, res) {
 router.put('/posts', async function (req, res) {
     const {id, idPost} = req.body;
     let post = [];
+    let posts = [];
     try {
         if (idPost == null) {
             post = await Post.find({'user': id})
@@ -35,10 +37,18 @@ router.put('/posts', async function (req, res) {
                 .sort({'_id': -1})
                 .limit(10);
         }
+        posts = post.map(async post => {
+            await Comment.find({'post': post._id}).populate('user')
+                .then(comments => post.set('comments', comments, {strict: false}))
+            return post;
+        });
+        post = await Promise.all(posts);
         res.json(post);
     }catch(err){
+        console.log(err);
         res.status(500);
         res.json({"error": err});
+
     }
 });
 
