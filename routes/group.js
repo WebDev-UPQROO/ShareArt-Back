@@ -56,7 +56,7 @@ router.put('/members', async function (req, res) {
 
   usersGroup.forEach(relation => {
     users.push(User.findOne(
-        {_id: relation.idUser})
+        {_id: relation.user})
         .select('-categories')
         .then(user => user.set("idUsersGroup", relation._id, {strict: false})))
   })

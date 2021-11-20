@@ -6,7 +6,6 @@ const PostsSchema = new Schema({
     categories: {type: mongoose.Types.ObjectId, ref: 'category'},
     group: {type: mongoose.Types.ObjectId, ref: 'group'},
     postOrigin: {type: mongoose.Types.ObjectId, ref: 'post'},
-    comments: {type: [mongoose.Types.ObjectId], ref: 'comment'},
     title: String,
     post: String,
     photo: String,

@@ -16,6 +16,7 @@ router.put('/post', async function (req, res) {
     const {idUser, idPost} = req.body;
     let ids = [];
     let post;
+    let posts;
 
     try {
         if (idUser == null) {
@@ -56,6 +57,12 @@ router.put('/post', async function (req, res) {
                     .sort({'_id': -1})
                     .limit(10);
         }
+        posts = post.map(async post => {
+            await Comment.find({'post': post._id}).populate('user')
+                .then(comments => post.set('comments', comments, {strict: false}))
+            return post;
+        });
+        post = await Promise.all(posts);
         res.json(post);
     } catch (err) {
         res.status(500);
