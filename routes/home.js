@@ -8,7 +8,7 @@ const User = require("../models/UserModel")
 const Follower = require("../models/FollowerModel")
 const Group = require("../models/GroupModel")
 const UserGroup = require("../models/UserGroupModel")
-const Category = require("../models/CategoryModel")
+require("../models/CategoryModel")
 
 
 /* GET 10 posts */
@@ -36,12 +36,10 @@ router.put('/post', async function (req, res) {
             const follows = await Follower.aggregate([
                 {$match: {user: mongoose.Types.ObjectId(idUser)}},
                 {$sample: {size: 500}}
-
             ]);
             ids = follows.map(follow => {
                 Follower.hydrate(follow);
                 return follow.followed;
-
             });
             if (idPost == null)
                 post = await Post.find()
