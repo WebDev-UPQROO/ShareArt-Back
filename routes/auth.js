@@ -22,18 +22,18 @@ router.put('/login', async function (req, res) {
             const token = generateToken(username);
             res.json({'id': user._id, 'token': token});
         } else {
-            res.status(403)
-            res.json({"error": " Incorrect password"})
+            res.status(403);
+            res.json({"error": "Incorrect password"});
         }
     } else {
-        res.status(403)
-        res.json({"error": "User not found"})
+        res.status(403);
+        res.json({"error": "User not found"});
     }
 });
 router.post('/register', async function (req, res) {
     let {name, username,email, password} = req.body;
 
-    const exist = await User.exists({'username': username})
+    const exist = await User.exists({'username': username});
 
     if (!exist) {
         password = await bcrypt.hash(password, 10);
@@ -43,9 +43,8 @@ router.post('/register', async function (req, res) {
         res.json({'id': newUser._id, 'token': token});
     } else {
         res.status(403);
-        res.json({"error":"username already exist"})
+        res.json({"error": "username already exist"});
     }
-
 });
 
 function generateToken(username) {

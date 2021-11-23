@@ -8,7 +8,7 @@ const User = require("../models/UserModel")
 const Follower = require("../models/FollowerModel")
 const Group = require("../models/GroupModel")
 const UserGroup = require("../models/UserGroupModel")
-const Category = require("../models/CategoryModel")
+require("../models/CategoryModel")
 
 
 /* GET 10 posts */
@@ -36,12 +36,10 @@ router.put('/post', async function (req, res) {
             const follows = await Follower.aggregate([
                 {$match: {user: mongoose.Types.ObjectId(idUser)}},
                 {$sample: {size: 500}}
-
             ]);
             ids = follows.map(follow => {
                 Follower.hydrate(follow);
                 return follow.followed;
-
             });
             if (idPost == null)
                 post = await Post.find()
@@ -75,12 +73,21 @@ router.put('/comments', async function(req, res) {
     const {comment} = req.body;
     let comments = [];
 
-    comment.forEach(comment => comments.push(Comment.findOne({'_id': comment})));
+    comment.forEach(comment =>
+        comments.push(
+            Comment.findOne({'_id': comment})
+                .populate({
+                        path: 'comments',
+                        populate: {path: 'comments'}
+                    }
+                )
+        )
+    );
     Promise.all(comments)
         .then(response => res.json(response))
         .catch(() => {
             res.status(500);
-            res.json({'error':'Something went wrong'});
+            res.json({'error': 'Something went wrong'});
         });
 });
 /* GET 10 Artists */
