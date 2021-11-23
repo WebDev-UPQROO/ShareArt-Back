@@ -56,8 +56,13 @@ router.put('/post', async function (req, res) {
                     .limit(10);
         }
         posts = post.map(async post => {
-            await Comment.find({'post': post._id}).populate('user')
-                .then(comments => post.set('comments', comments, {strict: false}))
+            await Comment.find({'post': post._id})
+                .then(comments => {
+                    let commentList = comments.map(comment => {
+                        return comment._id
+                    })
+                    post.set('comments', commentList, {strict: false})
+                })
             return post;
         });
         post = await Promise.all(posts);
@@ -75,12 +80,7 @@ router.put('/comments', async function(req, res) {
 
     comment.forEach(comment =>
         comments.push(
-            Comment.findOne({'_id': comment})
-                .populate({
-                        path: 'comments',
-                        populate: {path: 'comments'}
-                    }
-                )
+            Comment.findOne({'_id': comment}).populate('user')
         )
     );
     Promise.all(comments)
