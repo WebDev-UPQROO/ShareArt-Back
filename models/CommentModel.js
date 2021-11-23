@@ -7,7 +7,11 @@ const CommentSchema = new Schema({
     comments: {type: [mongoose.Types.ObjectId], ref: 'comment'},
     comment: String,
     date: String,
-    votes: {type: [mongoose.Types.ObjectId], ref: 'user'}
+    votes: [{
+        idUser: {type: mongoose.Types.ObjectId, ref: 'user'},
+        action: Number,
+        _id: false
+    }]
 });
 
 const comment = model('comment', CommentSchema,'comment')
