@@ -9,7 +9,11 @@ const PostsSchema = new Schema({
     title: String,
     post: String,
     photo: String,
-    votes: {type: [mongoose.Types.ObjectId], ref: 'user'}
+    votes: [{
+        idUser: {type: mongoose.Types.ObjectId, ref: 'user'},
+        action: Number,
+        _id: false
+    }]
 });
 
 const post = model('post', PostsSchema,'post')
