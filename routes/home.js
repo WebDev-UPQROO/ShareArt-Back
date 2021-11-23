@@ -73,12 +73,21 @@ router.put('/comments', async function(req, res) {
     const {comment} = req.body;
     let comments = [];
 
-    comment.forEach(comment => comments.push(Comment.findOne({'_id': comment})));
+    comment.forEach(comment =>
+        comments.push(
+            Comment.findOne({'_id': comment})
+                .populate({
+                        path: 'comments',
+                        populate: {path: 'comments'}
+                    }
+                )
+        )
+    );
     Promise.all(comments)
         .then(response => res.json(response))
         .catch(() => {
             res.status(500);
-            res.json({'error':'Something went wrong'});
+            res.json({'error': 'Something went wrong'});
         });
 });
 /* GET 10 Artists */
