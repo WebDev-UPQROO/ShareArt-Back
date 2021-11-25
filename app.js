@@ -4,7 +4,6 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const mongoose = require('mongoose');
-
 mongoose.Promise = require('bluebird');
 
 const homeRouter = require('./routes/home');
