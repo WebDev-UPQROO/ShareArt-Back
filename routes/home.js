@@ -37,6 +37,7 @@ router.put('/post', async function (req, res) {
                 {$match: {user: mongoose.Types.ObjectId(idUser)}},
                 {$sample: {size: 500}}
             ]);
+
             ids = follows.map(follow => {
                 Follower.hydrate(follow);
                 return follow.followed;
