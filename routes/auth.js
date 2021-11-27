@@ -12,15 +12,13 @@ router.put('/login', async function (req, res) {
 
     const exist = await User.exists({'username': username});
 
-    await bcrypt.hash('12345678', 10).then(hash => console.log(hash));
-
     if (exist) {
         const user = await User.findOne({'username': username});
         const match = await bcrypt.compare(password, user.password);
 
         if (match) {
             const token = generateToken(username);
-            res.json({'id': user._id, 'token': token});
+            res.json({'user': user, 'token': token});
         } else {
             res.status(403);
             res.json({"error": "Incorrect password"});
@@ -40,7 +38,7 @@ router.post('/register', async function (req, res) {
         const user = new User ({name, username,email, password});
         const newUser = await user.save();
         const token = generateToken(username);
-        res.json({'id': newUser._id, 'token': token});
+        res.json({'user': newUser, 'token': token});
     } else {
         res.status(403);
         res.json({"error": "username already exist"});
