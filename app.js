@@ -13,6 +13,8 @@ const profileRouter = require('./routes/profile');
 const groupRouter = require('./routes/group');
 const authRouter = require('./routes/auth');
 
+require('dotenv').config();
+
 const app = express();
 
 //DB Connection
@@ -43,30 +45,20 @@ app.use(express.static(path.join(__dirname, 'uploads')));
 // Save file locally
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, __dirname, 'uploads');
+        console.log(__dirname+"\\uploads")
+        cb(null, __dirname+'\\uploads');
     },
     filename: function (req, file, cb){
         cb(null, file.fieldname + '-' + file.originalname);
     }
 });
-app.use(multer({storage: storage}).array('file'));
-/*
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method');
-    res.header('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PUT, DELETE');
-    res.header('Allow', 'OPTIONS, GET, POST, PUT, DELETE');
-    next();
-});
-
- */
-
+//app.use(multer({storage: storage}).array('images'));
+app.use(multer({storage: storage}).single('image'));
 
 const URL = '/shareart/v1/';
 app.use(URL + 'home', homeRouter);
 app.use(URL + 'profile', profileRouter);
 app.use(URL + 'group', groupRouter);
 app.use(URL + 'auth', authRouter);
-
 
 module.exports = app;

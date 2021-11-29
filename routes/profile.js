@@ -151,27 +151,20 @@ router.put('/picture/cover', async function (req, res){
     const file = req.files;
     const {path} = file[0];
     const user = await User.findOne({'_id': id});
-    user.cover = await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'cover-' + id);
-    fs.removeSync(path);
+    user.cover = await cloudinary.upload(path, 'shareart/users/'+user.username+'/profile', 'cover-' + id);
+
     user.save().then(response => res.json(response));
 
 });
 
 router.put('/picture/profile', async function (req, res){
-    console.log("variables seteadas")
     const {id} = req.body;
-    const file = req.files;
-    const {path} = file[0];
-    console.log(id)
-    console.log(path)
-    console.log("busco usuario")
+    const file = req.file;
+    const {path} = file;
+    console.log(path);
     const user = await User.findOne({'_id': id});
-    console.log("envío foto")
     user.photo = await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'photo-' + id);
-    console.log(user.photo);
-    console.log("borro archivo")
-    fs.removeSync(path);
-    console.log("envío respuesta")
+    //fs.removeSync(path);
     user.save().then(response => res.json(response));
 
 });
@@ -183,5 +176,7 @@ router.put('/info', async function (req, res){
 router.put('/password', async function (req, res){
 
 });
+
+
 
 module.exports = router;
