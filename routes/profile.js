@@ -151,7 +151,7 @@ router.put('/picture/cover', async function (req, res){
     const file = req.files;
     const {path} = file[0];
     const user = await User.findOne({'_id': id});
-    user.cover = await cloudinary.upload(path, 'shareart/users/'+user.username+'/profile', 'cover-' + id);
+    user.cover = await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'cover-' + id);
 
     user.save().then(response => res.json(response));
 
@@ -161,15 +161,12 @@ router.put('/picture/profile', async function (req, res){
     const {id} = req.body;
     const file = req.files;
     const {path} = file[0];
-    console.log(file);
-    const user = await User.findOne({'_id': id});
-    //user.photo = await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'photo-' + id);
-    await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'photo-' + id)
-        .then(response => {console.log(response); user.photo = response;} )
-    .catch(err => console.log(err));
-    fs.removeSync(path);
-    user.save().then(response => res.json(response));
 
+    const user = await User.findOne({'_id': id});
+    user.photo = await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'photo-' + id)
+    fs.removeSync(path);
+
+    user.save().then(response => res.json(response));
 });
 
 router.put('/info', async function (req, res){
