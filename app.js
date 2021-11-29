@@ -42,7 +42,6 @@ app.use(express.urlencoded({extended: false}));
 // Save file locally
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        console.log(__dirname+"/uploads")
         cb(null, __dirname+'/uploads');
     },
     filename: function (req, file, cb){

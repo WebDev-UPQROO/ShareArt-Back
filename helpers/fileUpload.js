@@ -24,13 +24,13 @@ exports.upload = (file, folder, id) => {
         }
 
     return new Promise(resolve => {
-        console.log("entro a la promesa")
-        cloudinary.uploader.upload(file, options).then(response =>
+        cloudinary.uploader.upload(file, options).then(response => {
+            console.log(response);
             resolve({
-            id: response.public_id,
-            url: response.secure_url
-        }))
-        console.log("salgo de la promesa")
+                id: response.public_id,
+                url: response.secure_url
+            })
+        })
     })
 
 };
