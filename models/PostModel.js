@@ -8,12 +8,17 @@ const PostsSchema = new Schema({
     postOrigin: {type: mongoose.Types.ObjectId, ref: 'post'},
     title: String,
     post: String,
-    photo: String,
+    files: [{
+        id: String,
+        url: String,
+        _id: false
+    }],
     votes: [{
         idUser: {type: mongoose.Types.ObjectId, ref: 'user'},
         action: Number,
         _id: false
-    }]
+    }],
+    comments: [String]
 });
 
 const post = model('post', PostsSchema,'post')

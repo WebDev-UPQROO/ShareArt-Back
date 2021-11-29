@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs-extra');
 const router = express.Router();
 
 const User = require("../models/UserModel");
@@ -7,6 +8,8 @@ const Comment = require("../models/CommentModel")
 const Follower = require("../models/FollowerModel")
 const Group = require("../models/GroupModel")
 const UserGroup = require("../models/UserGroupModel")
+
+const cloudinary = require('../helpers/fileUpload');
 
 router.get('/:id', async function (req, res) {
     const {id} = req.params;
@@ -43,7 +46,7 @@ router.put('/posts', async function (req, res) {
                     let commentList = comments.map(comment => {
                         return comment._id
                     })
-                    post.set('comments', commentList, {strict: false})
+                    post.set('comments', commentList)
                 })
             return post;
         });
@@ -142,5 +145,37 @@ router.put('/groups', async function (req, res) {
         res.json(response);
     }
 });
+
+router.put('/picture/cover', async function (req, res){
+    const {id} = req.body;
+    const file = req.files;
+    const {path} = file[0];
+    const user = await User.findOne({'_id': id});
+    user.cover = await cloudinary.upload(path, 'shareart/users/'+user.username+'/profile', 'cover-' + id);
+
+    user.save().then(response => res.json(response));
+
+});
+
+router.put('/picture/profile', async function (req, res){
+    const {id} = req.body;
+    const file = req.files;
+    const {path} = file[0];
+    const user = await User.findOne({'_id': id});
+    user.photo = await cloudinary.upload(path, 'shareart/users/'+user.username+'/profile', 'photo-' + id);
+    fs.removeSync(path);
+    user.save().then(response => res.json(response));
+
+});
+
+router.put('/info', async function (req, res){
+
+});
+
+router.put('/password', async function (req, res){
+
+});
+
+
 
 module.exports = router;

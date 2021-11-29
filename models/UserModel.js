@@ -5,7 +5,14 @@ const UserSchema = new Schema({
     categories: {type: [mongoose.Types.ObjectId], ref: 'category'},
     name: String,
     username: String,
-    photo: String,
+    photo: {
+        id: String,
+        url: String
+    },
+    cover: {
+        id: String,
+        url: String
+    },
     bio: String,
     age: Number,
     email: String,

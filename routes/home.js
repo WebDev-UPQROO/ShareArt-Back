@@ -62,7 +62,7 @@ router.put('/post', async function (req, res) {
                     let commentList = comments.map(comment => {
                         return comment._id
                     })
-                    post.set('comments', commentList, {strict: false})
+                    post.set('comments', commentList)
                 })
             return post;
         });
@@ -124,5 +124,11 @@ router.put('/groups', async function(req, res) {
     }
     res.json(group);
 });
+
+router.put('/post/create', async function (req, res){
+
+
+});
+
 
 module.exports = router;
