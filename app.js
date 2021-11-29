@@ -43,7 +43,7 @@ app.use(express.static(path.join(__dirname, 'uploads')));
 // Save file locally
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, __dirname, 'app/uploads/');
+        cb(null, __dirname, 'uploads');
     },
     filename: function (req, file, cb){
         cb(null, file.fieldname + '-' + file.originalname);
