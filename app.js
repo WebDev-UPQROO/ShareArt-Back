@@ -37,13 +37,13 @@ app.use(bodyParser.json())
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'uploads')));
 
 
 // Save file locally
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, __dirname, 'public/uploads');
+        cb(null, __dirname, 'src/uploads/');
     },
     filename: function (req, file, cb){
         cb(null, file.fieldname + '-' + file.originalname);
