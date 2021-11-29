@@ -163,7 +163,10 @@ router.put('/picture/profile', async function (req, res){
     const {path} = file;
     console.log(path);
     const user = await User.findOne({'_id': id});
-    user.photo = await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'photo-' + id);
+    //user.photo = await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'photo-' + id);
+    await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'photo-' + id)
+        .then(response => {console.log(response); user.photo = response;} )
+    .catch(err => console.log(err));
     fs.removeSync(path);
     user.save().then(response => res.json(response));
 

@@ -8,7 +8,7 @@ const PostsSchema = new Schema({
     postOrigin: {type: mongoose.Types.ObjectId, ref: 'post'},
     title: String,
     post: String,
-    files: [{
+    images: [{
         id: String,
         url: String,
         _id: false
