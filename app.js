@@ -13,7 +13,6 @@ const profileRouter = require('./routes/profile');
 const groupRouter = require('./routes/group');
 const authRouter = require('./routes/auth');
 
-
 const app = express();
 
 //DB Connection
