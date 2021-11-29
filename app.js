@@ -11,8 +11,6 @@ const profileRouter = require('./routes/profile');
 const groupRouter = require('./routes/group');
 const authRouter = require('./routes/auth');
 
-require('dotenv').config();
-
 const app = express();
 
 //DB Connection
