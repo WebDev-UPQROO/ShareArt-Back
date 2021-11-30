@@ -45,6 +45,15 @@ router.post('/register', async function (req, res) {
     }
 });
 
+router.put('/change/password', async function (req, res) {
+    const {id,password} = req.body;
+    const user = await User.findOne({'_id': id});
+
+    user.password = await bcrypt.hash(password, 10);
+
+    user.save().then(response => res.json(response));
+});
+
 function generateToken(username) {
 
     return jwt.sign({username: username}, process.env.TOKEN_SECRET, {expiresIn: '24h'});

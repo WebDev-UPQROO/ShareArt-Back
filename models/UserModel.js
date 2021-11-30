@@ -14,7 +14,7 @@ const UserSchema = new Schema({
         url: String
     },
     bio: String,
-    age: Number,
+    birthday: Date,
     email: String,
     password: String
 });

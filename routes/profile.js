@@ -148,35 +148,55 @@ router.put('/groups', async function (req, res) {
 
 router.put('/picture/cover', async function (req, res){
     const {id} = req.body;
-    const file = req.files;
-    const {path} = file[0];
     const user = await User.findOne({'_id': id});
-    user.cover = await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'cover-' + id);
+
+    if (req.files.length > 0) {
+        const file = req.files;
+        const {path} = file[0];
+        user.cover = await cloudinary.upload(path, 'shareart/users/' + user._id + '/profile', 'cover-' + id);
+        fs.removeSync(path);
+    } else
+        user.cover = undefined
 
     user.save().then(response => res.json(response));
 
 });
 
-router.put('/picture/profile', async function (req, res){
+router.put('/picture/profile', async function (req, res) {
     const {id} = req.body;
-    const file = req.files;
-    const {path} = file[0];
-
     const user = await User.findOne({'_id': id});
-    user.photo = await cloudinary.upload(path, 'shareart/users/'+user._id+'/profile', 'photo-' + id)
-    fs.removeSync(path);
+
+    if (req.files.length > 0) {
+        const file = req.files;
+        const {path} = file[0];
+        user.photo = await cloudinary.upload(path, 'shareart/users/' + user._id + '/profile', 'photo-' + id)
+        fs.removeSync(path);
+    } else
+        user.photo = undefined;
 
     user.save().then(response => res.json(response));
 });
 
-router.put('/info', async function (req, res){
+router.put('/update/profile', async function (req, res){
+    const {id,bio,birthday,categories}= req.body;
 
+    const user = await User.findOne({'_id': id});
+    user.bio = bio;
+    user.birthday = birthday;
+    user.categories = categories;
+
+    user.save().then(response => res.json(response));
 });
 
-router.put('/password', async function (req, res){
+router.put('/update/info', async function (req, res){
+    const {id,name,username,email}= req.body;
 
+    const user = await User.findOne({'_id': id});
+    user.name = name;
+    user.username = username;
+    user.email = email;
+
+    user.save().then(response => res.json(response));
 });
-
-
 
 module.exports = router;
