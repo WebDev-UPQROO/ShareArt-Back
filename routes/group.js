@@ -78,5 +78,21 @@ router.put('/members', async function (req, res) {
 
 });
 
-module.exports = router;
+router.put('/create', async function (req, res) {
+
+});
+
+router.put('/delete', async function (req, res) {
+  const {idGroup, idUser} = req.body;
+
+  const group = Group.findOne({'_id': idGroup});
+
+  if(group.admin === idUser){
+    group.deleteOne();
+
+  }
+
+});
+
+  module.exports = router;
 

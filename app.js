@@ -10,6 +10,7 @@ const homeRouter = require('./routes/home');
 const profileRouter = require('./routes/profile');
 const groupRouter = require('./routes/group');
 const authRouter = require('./routes/auth');
+const FollowRouter = require('./routes/follow');
 
 require('dotenv').config()
 
@@ -48,5 +49,6 @@ app.use(URL + 'home', homeRouter);
 app.use(URL + 'profile', profileRouter);
 app.use(URL + 'group', groupRouter);
 app.use(URL + 'auth', authRouter);
+app.use(URL + 'follow', FollowRouter);
 
 module.exports = app;
