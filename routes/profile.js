@@ -1,6 +1,6 @@
 const express = require('express');
-const fs = require('fs-extra');
 const router = express.Router();
+const fs = require('fs-extra');
 
 const User = require("../models/UserModel");
 const Post = require("../models/PostModel");
