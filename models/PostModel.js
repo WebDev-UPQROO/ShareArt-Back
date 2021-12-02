@@ -3,7 +3,7 @@ const {Schema, model} = mongoose;
 
 const PostsSchema = new Schema({
     user: {type: mongoose.Types.ObjectId, ref: 'user'},
-    categories: {type: mongoose.Types.ObjectId, ref: 'category'},
+    categories: {type: [mongoose.Types.ObjectId], ref: 'category'},
     group: {type: mongoose.Types.ObjectId, ref: 'group'},
     postOrigin: {type: mongoose.Types.ObjectId, ref: 'post'},
     title: String,
@@ -18,7 +18,8 @@ const PostsSchema = new Schema({
         action: Number,
         _id: false
     }],
-    comments: [String]
+    comments: [String],
+    date: Date
 });
 
 const post = model('post', PostsSchema,'post')

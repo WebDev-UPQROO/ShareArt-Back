@@ -2,14 +2,14 @@ const express = require('express');
 const router = express.Router();
 const fs = require('fs-extra');
 
+const cloudinary = require('../helpers/fileUpload');
+
 const User = require("../models/UserModel");
 const Post = require("../models/PostModel");
 const Comment = require("../models/CommentModel")
 const Follower = require("../models/FollowerModel")
 const Group = require("../models/GroupModel")
 const UserGroup = require("../models/UserGroupModel")
-
-const cloudinary = require('../helpers/fileUpload');
 
 router.get('/:id', async function (req, res) {
     const {id} = req.params;

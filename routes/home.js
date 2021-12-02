@@ -1,6 +1,9 @@
 const express = require('express');
 const mongoose = require("mongoose");
 const router = express.Router();
+const fs = require('fs-extra');
+
+const cloudinary = require('../helpers/fileUpload');
 
 const Post = require("../models/PostModel")
 const Comment = require("../models/CommentModel")
@@ -125,8 +128,24 @@ router.put('/groups', async function(req, res) {
     res.json(group);
 });
 
-router.put('/post/create', async function (req, res){
+router.post('/post/create', async function (req, res) {
+    const {idUser, title, description, categories} = req.body;
+    const files = req.files;
+    let images = [];
+    const date = new Date();
 
+    const newPost = new Post({"user": idUser, "categories":categories, "date":date,"title": title, "post": description});
+
+    const post = await newPost.save().catch(err => console.log(err));
+    for (const file of files) {
+        const {path} = file;
+        const newPath = await cloudinary.upload(path, 'shareart/users/' + idUser + '/posts/' + post._id, null)
+        images.push(newPath)
+        fs.removeSync(path);
+    }
+    post.images = images;
+
+    await post.save().then(response => res.json(response));
 });
 
 router.post('/post/delete', async function (req, res){
