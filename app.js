@@ -22,7 +22,7 @@ mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true})
     .catch(err => console.log(err));
 
 //Cors
-app.use(cors({origin: '*'}));
+app.use(cors());
 
 // parse application/x-www-form-urlencoded and application/json
 app.use(express.urlencoded({extended: false}));
