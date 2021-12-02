@@ -127,6 +127,30 @@ router.put('/groups', async function(req, res) {
 
 router.put('/post/create', async function (req, res){
 
+});
+
+router.post('/post/delete', async function (req, res){
+
+
+});
+
+router.put('/post/vote', async function (req, res){
+
+
+});
+
+router.put('/comment/create', async function (req, res){
+
+
+});
+
+router.post('/comment/delete', async function (req, res){
+
+
+});
+
+router.put('/comment/vote', async function (req, res){
+
 
 });
 

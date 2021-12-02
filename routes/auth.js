@@ -46,12 +46,19 @@ router.post('/register', async function (req, res) {
 });
 
 router.put('/change/password', async function (req, res) {
-    const {id,password} = req.body;
+    const {id,c_password,n_password} = req.body;
     const user = await User.findOne({'_id': id});
 
-    user.password = await bcrypt.hash(password, 10);
+    const match = await bcrypt.compare(c_password, user.password);
 
-    user.save().then(response => res.json(response));
+    if (match) {
+        user.password = await bcrypt.hash(n_password, 10);
+        user.save().then(response => res.json(response));
+    } else {
+        res.status(403);
+        res.json({"error": "Incorrect password"});
+    }
+
 });
 
 function generateToken(username) {
