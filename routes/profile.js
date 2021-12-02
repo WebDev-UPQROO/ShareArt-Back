@@ -3,6 +3,7 @@ const router = express.Router();
 const fs = require('fs-extra');
 
 const cloudinary = require('../helpers/fileUpload');
+require('../models/MessageModel');
 
 const User = require("../models/UserModel");
 const Post = require("../models/PostModel");
@@ -67,29 +68,43 @@ router.put('/:follow', async function (req, res) {
     let users = [];
     let followers = [];
 
-    let filter1 = 'user';
-    let filter2 = 'followed';
+    if (follow === 'followed') {
+        if (idFollow == null)
+            follows = await Follower.find({'user': id})
+                .sort({'_id': -1})
+                .limit(10);
+        else
+            follows = await Follower.find({'user': id})
+                .where('_id').lt(idFollow)
+                .sort({'_id': -1})
+                .limit(10);
 
-    if (follow === 'followers') {
-        filter1 = 'followed';
-        filter2 = 'user';
+        follows.forEach(follow => {
+            users.push(User.findOne({'_id': follow.followed})
+                .select('-categories')
+                .then(user => user.set('idFollow', follow._id, {strict: false})))
+        })
+
+    } else if (follow === 'followers') {
+        if (idFollow == null)
+            follows = await Follower.find({'followed': id})
+                .sort({'_id': -1})
+                .limit(10);
+        else
+            follows = await Follower.find({'followed': id})
+                .where('_id').lt(idFollow)
+                .sort({'_id': -1})
+                .limit(10);
+
+        follows.forEach(follow => {
+            users.push(User.findOne({'_id': follow.user})
+                .select('-categories')
+                .then(user => user.set('idFollow', follow._id, {strict: false})))
+        })
+    } else {
+        res.status(404);
+        res.json({"message":"path not found"});
     }
-
-    if (idFollow == null)
-        follows = await Follower.find({filter1: id})
-            .sort({'_id': -1})
-            .limit(10);
-    else
-        follows = await Follower.find({filter1: id})
-            .where('_id').lt(idFollow)
-            .sort({'_id': -1})
-            .limit(10);
-
-    follows.forEach(follow => {
-        users.push(User.findOne({'_id': follow[filter2]})
-            .select('-categories')
-            .then(user => user.set('idFollow', follow._id, {strict: false})))
-    })
 
     const following = await Promise.all(users);
 
