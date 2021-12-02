@@ -96,10 +96,21 @@ router.put('/comments', async function(req, res) {
 });
 /* GET 10 Artists */
 router.put('/artists', async function (req, res) {
-    const {idUser} = req.body;
-    let artist = await User.find()
-        .select('-categories')
-        .limit(10);
+    const {idUser, idArtist} = req.body;
+    let artist;
+
+    if(idArtist === null){
+        artist = await User.find()
+            .select('-categories')
+            .sort({'_id': 1})
+            .limit(10);
+    }else {
+        artist = await User.find()
+            .select('-categories')
+            .sort({'_id': -1})
+            .where('_id').lt(idArtist)
+            .limit(10);
+    }
 
     if (idUser !== null) {
         let artists = artist.map(async artist => {
@@ -107,6 +118,7 @@ router.put('/artists', async function (req, res) {
                 .then(follow => (artist.set('follow', follow, {strict: false})));
             return artist
         });
+
         artist = await Promise.all(artists);
     }
     res.json(artist);
@@ -148,6 +160,26 @@ router.post('/post/create', async function (req, res) {
     await post.save().then(response => res.json(response));
 });
 
+router.put('/post/edit', async function (req, res){
+    const {idPost, title, description, categories,idImages} = req.body;
+    const post = await Post.findOne({'_id': idPost});
+
+    post.title = title;
+    post.description = description;
+    post.categories = categories;
+
+    idImages.forEach(image => cloudinary.delete(image));
+
+    post.images.map(image => {
+        for (const id in idImages) {
+            if(image.id !== id){
+            }
+
+        }
+    })
+
+});
+
 router.post('/post/delete', async function (req, res){
 
 
@@ -170,6 +202,15 @@ router.post('/comment/delete', async function (req, res){
 
 router.put('/comment/vote', async function (req, res){
 
+
+});
+
+router.put('/explore', async function (req, res){
+    const {search, idPost} = req.body;
+    const post = await Post.find({ $or: [{ title: search }, { description: search }, { age: 2 }] })
+        .populate('user')
+        .sort({'_id': -1})
+        .limit(10);
 
 });
 
