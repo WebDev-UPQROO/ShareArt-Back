@@ -99,7 +99,7 @@ router.put('/artists', async function (req, res) {
     const {idUser, idArtist} = req.body;
     let artist;
 
-    if(idArtist === null){
+    if(idArtist == null){
         artist = await User.find()
             .select('-categories')
             .sort({'_id': -1})
