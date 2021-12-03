@@ -322,6 +322,4 @@ router.put('/comment/vote', async function (req, res) {
 
 });
 
-
-
 module.exports = router;
