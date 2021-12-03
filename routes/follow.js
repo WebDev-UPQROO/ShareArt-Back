@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 
-
 const Follower = require("../models/FollowerModel")
 
 router.post('/', async function (req, res) {
