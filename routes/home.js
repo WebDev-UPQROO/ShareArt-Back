@@ -27,12 +27,14 @@ router.put('/post', async function (req, res) {
                 post = await Post.find()
                     .populate('user')
                     .populate('categories')
+                    .populate({path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]})
                     .sort({'_id': -1})
                     .limit(10);
             else
                 post = await Post.find()
                     .populate('user')
                     .populate('categories')
+                    .populate({path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]})
                     .where('_id').lt(idPost)
                     .sort({'_id': -1})
                     .limit(10);
@@ -50,12 +52,16 @@ router.put('/post', async function (req, res) {
             if (idPost == null)
                 post = await Post.find()
                     .populate('user')
+                    .populate('categories')
+                    .populate({path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]})
                     .where('user').in(ids)
                     .sort({'_id': -1})
                     .limit(10);
             else
                 post = await Post.find()
                     .populate('user')
+                    .populate('categories')
+                    .populate({path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]})
                     .where('user').in(ids)
                     .where('_id').lt(idPost)
                     .sort({'_id': -1})
@@ -142,26 +148,33 @@ router.put('/groups', async function(req, res) {
 });
 
 router.post('/post/create', async function (req, res) {
-    let {id, title, description, categories} = req.body;
+    let {id, title, description, categories, idPost} = req.body;
     const files = req.files;
+    let post;
     let images = [];
     const date = new Date();
     if(!Array.isArray(categories))
         categories = [categories];
 
-    const newPost = new Post({"user": id, "categories": categories, "date": date, "title": title, "post": description});
-
-    const post = await newPost.save().catch(err => console.log(err));
-    if (files !== undefined) {
-        for (const file of files) {
-            const {path} = file;
-            const newPath = await cloudinary.upload(path, 'shareart/users/' + id + '/posts/' + post._id, null)
-            images.push(newPath)
-            fs.removeSync(path);
-        }
-        post.images = images;
+    if(idPost !== "null"){
+        post = new Post({"user": id,"postOrigin":idPost, "categories": categories, "date": date, "title": title, "post": description});
     }
-    await post.save().then(response => res.json(response));
+    else {
+        const newPost = new Post({"user": id, "categories": categories, "date": date, "title": title, "post": description});
+        post = await newPost.save();
+        if (files !== undefined) {
+            for (const file of files) {
+                const {path} = file;
+                const newPath = await cloudinary.upload(path, 'shareart/users/' + id + '/posts/' + post._id, null)
+                images.push(newPath)
+                fs.removeSync(path);
+            }
+            post.images = images;
+        }
+    }
+    await post.save();
+    Post.populate(post, [{path: "categories"}, {path: "user"}, {path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]}])
+        .then(response => res.json(response));
 });
 
 router.put('/post/edit', async function (req, res) {
@@ -171,7 +184,7 @@ router.put('/post/edit', async function (req, res) {
     const post = await Post.findOne({'_id': id});
 
     post.title = title;
-    post.description = description;
+    post.post = description;
     if(Array.isArray(categories))
         post.categories = categories;
     else
@@ -197,14 +210,16 @@ router.put('/post/edit', async function (req, res) {
         cloudinary.delete(deleteImages);
     }
 
-    files?.forEach(file => {
+    for (const file of files) {
         const {path} = file;
-        const newPath = cloudinary.upload(path, 'shareart/users/' + post.user + '/posts/' + post._id, null)
+        const newPath = await cloudinary.upload(path, 'shareart/users/' + post.user + '/posts/' + post._id, null)
         post.images.push(newPath)
         fs.removeSync(path);
-    })
+    }
 
-    post.save().then(response => res.json(response))
+    await post.save();
+    Post.populate(post, [{path: "categories"}, {path: "user"}, {path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]}])
+        .then(response => res.json(response));
 });
 
 router.post('/post/delete', async function (req, res) {
@@ -248,14 +263,14 @@ router.put('/comment/create', async function (req, res) {
     const newComment = new Comment({"user": idUser,"post": idPost , "comment": content, "date": date});
     const comment = await newComment.save();
 
-    if(idComment != null){
-        const fatherComment = await Comment.find({'_id':idComment});
-        fatherComment.comments.push(comment._id);
-        await fatherComment.save();
+    if(idComment != null) {
+        const parentComment = await Comment.find({'_id': idComment});
+        parentComment.comments.push(comment._id);
+        await parentComment.save();
     }
 
     res.status(200);
-    res.json({"message":"ok"})
+    res.json(comment)
 });
 
 router.post('/comment/edit', async function (req, res){
@@ -263,14 +278,27 @@ router.post('/comment/edit', async function (req, res){
     const comment = await Comment.find({'_id':id});
 
     comment.comment = content;
-    comment.date
+    comment.date = new Date();
 
-
+    await comment.save().then(response => res.json(response));
 
 });
 
-router.post('/comment/delete', async function (req, res){
+router.post('/comment/delete', async function (req, res) {
+    const {id} = req.body;
+    const comment = await Comment.find({'_id': id})
+    const parentComment = await Comment.find({'_id': comment._id})
+    for (let i = 0; i < parentComment.comments.length; i++) {
+        if (parentComment.comments[i].id === comment._id) {
+            parentComment.comments.splice(i, 1);
+            break;
+        }
+    }
+    await parentComment.save();
+    await comment.delete();
 
+    res.status(200)
+    res.json({"message":"ok"});
 
 });
 
@@ -293,15 +321,5 @@ router.put('/comment/vote', async function (req, res) {
     await comment.save().then(response => res.json(response));
 
 });
-
-router.put('/explore', async function (req, res){
-    const {search, idPost} = req.body;
-    const post = await Post.find({ $or: [{ title: search }, { description: search }, { age: 2 }] })
-        .populate('user')
-        .sort({'_id': -1})
-        .limit(10);
-
-});
-
 
 module.exports = router;
