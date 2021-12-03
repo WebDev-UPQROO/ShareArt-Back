@@ -99,10 +99,10 @@ router.put('/artists', async function (req, res) {
     const {idUser, idArtist} = req.body;
     let artist;
 
-    if(idArtist === null){
+    if(idArtist == null){
         artist = await User.find()
             .select('-categories')
-            .sort({'_id': 1})
+            .sort({'_id': -1})
             .limit(10);
     }else {
         artist = await User.find()
@@ -140,39 +140,39 @@ router.put('/groups', async function(req, res) {
 });
 
 router.post('/post/create', async function (req, res) {
-    const {idUser, title, description, categories} = req.body;
+    const {id, title, post, categories} = req.body;
     const files = req.files;
     let images = [];
     const date = new Date();
 
-    const newPost = new Post({"user": idUser, "categories":categories, "date":date,"title": title, "post": description});
+    const newPost = new Post({"user": id, "categories":categories, "date":date,"title": title, "post": post});
 
-    const post = await newPost.save().catch(err => console.log(err));
+    const posts = await newPost.save().catch(err => console.log(err));
     for (const file of files) {
         const {path} = file;
-        const newPath = await cloudinary.upload(path, 'shareart/users/' + idUser + '/posts/' + post._id, null)
+        const newPath = await cloudinary.upload(path, 'shareart/users/' + id + '/posts/' + posts._id, null)
         images.push(newPath)
         fs.removeSync(path);
     }
-    post.images = images;
+    posts.images = images;
 
-    await post.save().then(response => res.json(response));
+    await posts.save().then(response => res.json(response));
 });
 
 router.put('/post/edit', async function (req, res){
-    const {idPost, title, description, categories, idImages} = req.body;
+    const {id, title, post, categories, idImages} = req.body;
     const files = req.files;
 
-    const post = await Post.findOne({'_id': idPost});
+    const posts = await Post.findOne({'_id': id});
 
-    post.title = title;
-    post.description = description;
-    post.categories = categories;
+    posts.title = title;
+    posts.description = post;
+    posts.categories = categories;
 
     idImages.forEach(id => {
-        for (let i = 0; i < post.images.length; i++) {
-            if (post.images[i].id === id) {
-                post.images.splice(i, 1);
+        for (let i = 0; i < posts.images.length; i++) {
+            if (posts.images[i].id === id) {
+                posts.images.splice(i, 1);
                 i--;
             }
         }
@@ -182,12 +182,12 @@ router.put('/post/edit', async function (req, res){
 
     for (const file of files) {
         const {path} = file;
-        const newPath = await cloudinary.upload(path, 'shareart/users/' + post.user + '/posts/' + post._id, null)
-        post.images.push(newPath)
+        const newPath = await cloudinary.upload(path, 'shareart/users/' + posts.user + '/posts/' + posts._id, null)
+        posts.images.push(newPath)
         fs.removeSync(path);
     }
 
-    post.save().then(response => res.json(response))
+    posts.save().then(response => res.json(response))
 
 });
 
@@ -207,8 +207,8 @@ router.post('/post/delete', async function (req, res) {
 });
 
 router.put('/post/vote', async function (req, res) {
-
-
+    const {idUser, type, idPost} = req.body;
+    const post = Post.find({})
 });
 
 router.put('/comment/create', async function (req, res){
