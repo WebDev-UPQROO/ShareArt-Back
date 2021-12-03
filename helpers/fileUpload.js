@@ -35,10 +35,6 @@ exports.upload = (file, folder, id) => {
 
 };
 
-exports.delete = (resources) => {
-    cloudinary.api.delete_resources(resources).then(res => console.log(res));
-}
-
-exports.deleteFolder = (folder) => {
-    cloudinary.api.delete_folder(folder).then(res => console.log(res));
+exports.delete = (image_id) => {
+    cloudinary.uploader.destroy(image_id).then(res => console.log(res));
 }
