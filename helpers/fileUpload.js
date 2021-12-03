@@ -35,5 +35,5 @@ exports.upload = (file, folder, id) => {
 };
 
 exports.delete = (image_id) => {
-    cloudinary.uploader.destroy(image_id).then(res => console.log(res));
+    cloudinary.uploader.destroy(image_id);
 }
