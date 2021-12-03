@@ -178,7 +178,7 @@ router.put('/post/edit', async function (req, res){
         }
     });
 
-    cloudinary.delete(idImages);
+    idImages.forEach(image => cloudinary.delete(image));
 
     for (const file of files) {
         const {path} = file;
@@ -194,11 +194,9 @@ router.put('/post/edit', async function (req, res){
 router.post('/post/delete', async function (req, res) {
     const {idUser, idPost} = req.body;
     const post = await Post.findOne({'_id': idPost});
-    console.log(post);
     if(post.user.toString() === idUser){
-        //await post.delete();
-        cloudinary.delete('shareart/users/' + post.user + '/posts/' + post._id);
-        cloudinary.deleteFolder('shareart/users/' + post.user + '/posts');
+        await post.delete();
+        post.images.forEach(image => cloudinary.delete(image.id));
         res.status(200)
         res.json({"message":"Todo bien"})
     }else{
