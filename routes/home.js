@@ -73,7 +73,7 @@ router.put('/post', async function (req, res) {
         res.json(post);
     } catch (err) {
         res.status(500);
-        res.json({'error': err});
+        res.json({'error': 'Intentalo mas tarde'});
     }
 
 });
@@ -91,7 +91,7 @@ router.put('/comments', async function(req, res) {
         .then(response => res.json(response))
         .catch(() => {
             res.status(500);
-            res.json({'error': 'Something went wrong'});
+            res.json({'error': 'Algo salió mal :('});
         });
 });
 /* GET 10 Artists */
@@ -123,7 +123,6 @@ router.put('/artists', async function (req, res) {
     }
     res.json(artist);
 });
-
 /* GET 10 groups */
 router.put('/groups', async function(req, res) {
     const {idUser} = req.body;
@@ -161,31 +160,55 @@ router.post('/post/create', async function (req, res) {
 });
 
 router.put('/post/edit', async function (req, res){
-    const {idPost, title, description, categories,idImages} = req.body;
+    const {idPost, title, description, categories, idImages} = req.body;
+    const files = req.files;
+
     const post = await Post.findOne({'_id': idPost});
 
     post.title = title;
     post.description = description;
     post.categories = categories;
 
-    idImages.forEach(image => cloudinary.delete(image));
-
-    post.images.map(image => {
-        for (const id in idImages) {
-            if(image.id !== id){
+    idImages.forEach(id => {
+        for (let i = 0; i < post.images.length; i++) {
+            if (post.images[i].id === id) {
+                post.images.splice(i, 1);
+                i--;
             }
-
         }
-    })
+    });
+
+    cloudinary.delete(idImages);
+
+    for (const file of files) {
+        const {path} = file;
+        const newPath = await cloudinary.upload(path, 'shareart/users/' + post.user + '/posts/' + post._id, null)
+        post.images.push(newPath)
+        fs.removeSync(path);
+    }
+
+    post.save().then(response => res.json(response))
 
 });
 
-router.post('/post/delete', async function (req, res){
-
+router.post('/post/delete', async function (req, res) {
+    const {idUser, idPost} = req.body;
+    const post = await Post.findOne({'_id': idPost});
+    console.log(post);
+    if(post.user.toString() === idUser){
+        //await post.delete();
+        cloudinary.delete('shareart/users/' + post.user + '/posts/' + post._id);
+        cloudinary.deleteFolder('shareart/users/' + post.user + '/posts');
+        res.status(200)
+        res.json({"message":"Todo bien"})
+    }else{
+        res.status(403);
+        res.json({"error": "No puedes eliminar este post"});
+    }
 
 });
 
-router.put('/post/vote', async function (req, res){
+router.put('/post/vote', async function (req, res) {
 
 
 });

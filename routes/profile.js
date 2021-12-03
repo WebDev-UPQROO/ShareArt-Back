@@ -12,16 +12,21 @@ const Follower = require("../models/FollowerModel")
 const Group = require("../models/GroupModel")
 const UserGroup = require("../models/UserGroupModel")
 
-router.get('/:id', async function (req, res) {
-    const {id} = req.params;
-    await User.findOne({'_id': id})
+router.put('/', async function (req, res) {
+    const {id,idUser} = req.body;
+    const user  = await User.findOne({'_id': id})
         .populate('categories')
-        .then(user => res.json(user))
         .catch((err) => {
             res.status(404);
             res.json({"error": "User profile not found"});
             console.log(err)
         })
+
+    if (idUser != null){
+        await Follower.exists({'user': idUser, 'followed': id})
+            .then(follow => user.set('follow', follow, {strict: false}))
+    }
+    res.json(user);
 });
 
 router.put('/posts', async function (req, res) {
@@ -106,12 +111,12 @@ router.put('/:follow', async function (req, res) {
         })
     } else {
         res.status(404);
-        res.json({"message": "path not found"});
+        res.json({"error": "path not found"});
     }
 
     const following = await Promise.all(users);
 
-    if (idFollow == null)
+    if (idFollow == null && following.length>0)
         following[0].set('total', total, {strict: false})
 
     if (idUser == null)
