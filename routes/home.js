@@ -239,21 +239,25 @@ router.post('/post/delete', async function (req, res) {
 
 router.put('/post/vote', async function (req, res) {
     const {idUser, type, idPost} = req.body;
-    const post = await Post.find({'_id': idPost})
+    const post = await Post.findOne({'_id': idPost})
 
+    if(post.votes !== null)
     for (let i = 0; i < post.votes.length; i++) {
-        if (post.votes[i].idUser === idUser) {
+        if (post.votes[i].idUser.toString() === idUser) {
             post.votes.splice(i, 1);
             break;
         }
-    }
+    }else
+        post.votes = [];
 
-    if (type !== 2) {
+    if (type !== "2") {
         const vote = {"idUser": idUser, "action": type};
         post.votes.push(vote);
     }
 
-    await post.save().then(response => res.json(response));
+    await post.save();
+    Post.populate(post, [{path: "categories"}, {path: "user"}, {path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]}])
+        .then(response => res.json(response));
 
 });
 
@@ -264,7 +268,7 @@ router.put('/comment/create', async function (req, res) {
     const comment = await newComment.save();
 
     if(idComment != null) {
-        const parentComment = await Comment.find({'_id': idComment});
+        const parentComment = await Comment.findOne({'_id': idComment});
         parentComment.comments.push(comment._id);
         await parentComment.save();
     }
@@ -275,7 +279,7 @@ router.put('/comment/create', async function (req, res) {
 
 router.post('/comment/edit', async function (req, res){
     const {id,content} = req.body;
-    const comment = await Comment.find({'_id':id});
+    const comment = await Comment.findOne({'_id':id});
 
     comment.comment = content;
     comment.date = new Date();
@@ -286,10 +290,10 @@ router.post('/comment/edit', async function (req, res){
 
 router.post('/comment/delete', async function (req, res) {
     const {id} = req.body;
-    const comment = await Comment.find({'_id': id})
-    const parentComment = await Comment.find({'_id': comment._id})
+    const comment = await Comment.findOne({'_id': id})
+    const parentComment = await Comment.findOne({'_id': comment._id})
     for (let i = 0; i < parentComment.comments.length; i++) {
-        if (parentComment.comments[i].id === comment._id) {
+        if (parentComment.comments[i].id.toString() === comment._id) {
             parentComment.comments.splice(i, 1);
             break;
         }
