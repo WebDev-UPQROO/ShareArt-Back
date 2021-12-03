@@ -38,12 +38,14 @@ router.put('/posts', async function (req, res) {
             post = await Post.find({'user': id})
                 .populate('user')
                 .populate('categories')
+                .populate({path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]})
                 .sort({'_id': -1})
                 .limit(10);
         } else {
             post = await Post.find({'user': id})
                 .populate('user')
                 .populate('categories')
+                .populate({path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]})
                 .where('_id').lt(idPost)
                 .sort({'_id': -1})
                 .limit(10);
