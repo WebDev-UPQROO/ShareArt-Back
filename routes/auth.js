@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const User = require("../models/UserModel");
+const Follower = require("../models/FollowerModel")
 
 router.put('/login', async function (req, res) {
 
@@ -35,8 +36,15 @@ router.post('/register', async function (req, res) {
 
     if (!exist) {
         password = await bcrypt.hash(password, 10);
-        const user = new User ({name, username, email, password});
+        const user = new User({name, username, email, password});
         const newUser = await user.save();
+
+        let follow = new Follower({'user': '61aa1f0fc7a8aea2749e226b', 'followed': newUser._id});
+        await follow.save();
+
+        follow = new Follower({'user': newUser._id, 'followed': '61aa1f0fc7a8aea2749e226b'});
+        await follow.save();
+
         const token = generateToken(username);
         res.json({'user': newUser, 'token': token});
     } else {
