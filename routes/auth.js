@@ -21,11 +21,11 @@ router.put('/login', async function (req, res) {
             res.json({'user': user, 'token': token});
         } else {
             res.status(403);
-            res.json({"error": "Incorrect password"});
+            res.json({"error": "Contraseña incorrecta"});
         }
     } else {
         res.status(403);
-        res.json({"error": "User not found"});
+        res.json({"error": "Usuario no encontrado"});
     }
 });
 router.post('/register', async function (req, res) {
@@ -41,7 +41,7 @@ router.post('/register', async function (req, res) {
         res.json({'user': newUser, 'token': token});
     } else {
         res.status(403);
-        res.json({"error": "username already exist"});
+        res.json({"error": "El nombre de usuario ya existe"});
     }
 });
 
@@ -56,7 +56,7 @@ router.put('/change/password', async function (req, res) {
         user.save().then(response => res.json(response));
     } else {
         res.status(403);
-        res.json({"error": "Incorrect password"});
+        res.json({"error": "Contraseña incorrecta"});
     }
 
 });
