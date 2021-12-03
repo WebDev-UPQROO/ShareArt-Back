@@ -67,13 +67,15 @@ router.put('/:follow', async function (req, res) {
     let follows;
     let users = [];
     let followers = [];
+    let total;
 
     if (follow === 'followed') {
-        if (idFollow == null)
+        if (idFollow == null) {
             follows = await Follower.find({'user': id})
                 .sort({'_id': -1})
                 .limit(10);
-        else
+            total = await Follower.find({'user': id}).countDocuments();
+        } else
             follows = await Follower.find({'user': id})
                 .where('_id').lt(idFollow)
                 .sort({'_id': -1})
@@ -86,11 +88,12 @@ router.put('/:follow', async function (req, res) {
         })
 
     } else if (follow === 'followers') {
-        if (idFollow == null)
+        if (idFollow == null) {
             follows = await Follower.find({'followed': id})
                 .sort({'_id': -1})
                 .limit(10);
-        else
+            total = await Follower.find({'followed': id}).countDocuments();
+        }else
             follows = await Follower.find({'followed': id})
                 .where('_id').lt(idFollow)
                 .sort({'_id': -1})
@@ -103,10 +106,13 @@ router.put('/:follow', async function (req, res) {
         })
     } else {
         res.status(404);
-        res.json({"message":"path not found"});
+        res.json({"message": "path not found"});
     }
 
     const following = await Promise.all(users);
+
+    if (idFollow == null)
+        following[0].set('total', total, {strict: false})
 
     if (idUser == null)
         res.json(following);
