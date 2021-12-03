@@ -253,7 +253,9 @@ router.put('/post/vote', async function (req, res) {
         post.votes.push(vote);
     }
 
-    await post.save().then(response => res.json(response));
+    await post.save();
+    Post.populate(post, [{path: "categories"}, {path: "user"}, {path: "postOrigin",populate:[{path: "categories"}, {path: "user"}]}])
+        .then(response => res.json(response));
 
 });
 
